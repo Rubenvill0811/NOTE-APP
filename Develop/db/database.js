@@ -1,7 +1,7 @@
 const { error } = require('console');
 const fs = require('fs');
 const util = require('util');
-const uuidv1 = require('uuid/v1');
+const { v1: uniqueId} = require('uuid')
 
 const createFilePromise = util.promisify(fs.writeFile);
 const readFilePromise = util.promisify(fs.readFile);
@@ -30,7 +30,7 @@ class DB {
             throw new Error('The title or text fields cannot be empty.');
         }
 
-        const newNote = { title, content, id: uuidv1() };
+        const newNote = { title, content, id: uniqueId() };
         try {
             const notes = await this.storedNotes();
             const noteBook = [...notes, newNote];
@@ -45,20 +45,12 @@ class DB {
         try {
             const notes = await this.storedNotes();
             const filteredNotes = notes.filter((note) => note.id !== id);
-            await this.write(filteredNotes);
+            await this.post(filteredNotes);
         } catch (err) {
-            console.error(`Error deleting note: ${err}`)
-                throw error;
+            console.error(`Error deleting note: ${err}`);
+            throw new Error('There was an error deleting this note.');
         }
     }
-
-
-
-
-
-
-
-
 }
 
-module.exports = DB;
+module.exports =  new DB;
